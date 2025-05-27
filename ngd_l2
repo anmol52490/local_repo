@@ -1,0 +1,168 @@
+CRUD operations in CouchDB Student Database
+
+For CouchDB, you'll use curl commands in your CMD or interact via Fauxton. The following commands are for CMD, using curl. Replace http://127.0.0.1:5984 with your CouchDB instance URL if different. Username and password are admin and admin.
+
+1. Create a student database with the fields: (SRN, Sname, Degree, Sem, CGPA)
+Bash
+
+curl -X PUT http://admin:admin@127.0.0.1:5984/student_db
+
+2. Insert Documents (Example Data):
+
+You'll insert documents one by one using curl.
+Bash
+
+curl -X POST -H "Content-Type: application/json" -d "{\"SRN\":\"101\",\"Sname\":\"Alice\",\"Degree\":\"BCA\",\"Sem\":3,\"CGPA\":8.5}" http://admin:admin@127.0.0.1:5984/student_db
+curl -X POST -H "Content-Type: application/json" -d "{\"SRN\":\"102\",\"Sname\":\"Bob\",\"Degree\":\"BCA\",\"Sem\":4,\"CGPA\":7.2}" http://admin:admin@127.0.0.1:5984/student_db
+curl -X POST -H "Content-Type: application/json" -d "{\"SRN\":\"103\",\"Sname\":\"Charlie\",\"Degree\":\"BSc\",\"Sem\":5,\"CGPA\":9.1}" http://admin:admin@127.0.0.1:5984/student_db
+curl -X POST -H "Content-Type: application/json" -d "{\"SRN\":\"104\",\"Sname\":\"Diana\",\"Degree\":\"BCA\",\"Sem\":3,\"CGPA\":6.8}" http://admin:admin@127.0.0.1:5984/student_db
+curl -X POST -H "Content-Type: application/json" -d "{\"SRN\":\"105\",\"Sname\":\"Rahul\",\"Degree\":\"BCA\",\"Sem\":4,\"CGPA\":7.9}" http://admin:admin@127.0.0.1:5984/student_db
+curl -X POST -H "Content-Type: application/json" -d "{\"SRN\":\"106\",\"Sname\":\"Eve\",\"Degree\":\"BSc\",\"Sem\":6,\"CGPA\":8.2}" http://admin:admin@127.00.1:5984/student_db
+curl -X POST -H "Content-Type: application/json" -d "{\"SRN\":\"107\",\"Sname\":\"Frank\",\"Degree\":\"BCA\",\"Sem\":5,\"CGPA\":6.5}" http://admin:admin@127.0.0.1:5984/student_db
+
+3. Display all the documents:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/student_db/_all_docs?include_docs=true
+
+4. Display all the students in BCA:
+
+First, create a design document with a view to query by Degree.
+Bash
+
+curl -X PUT -H "Content-Type: application/json" -d "{\"_id\":\"_design/students\",\"views\":{\"by_degree\":{\"map\":\"function(doc) { if (doc.Degree) { emit(doc.Degree, doc); } }\"}}}" http://admin:admin@127.0.0.1:5984/student_db/_design/students
+
+Then query the view:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/student_db/_design/students/_view/by_degree?key=%22BCA%22&include_docs=true
+
+5. Display all the students in ascending order (by Sname):
+
+Create another view for sorting by name.
+Bash
+
+curl -X PUT -H "Content-Type: application/json" -d "{\"_id\":\"_design/students_by_name\",\"views\":{\"by_name\":{\"map\":\"function(doc) { if (doc.Sname) { emit(doc.Sname, doc); } }\"}}}" http://admin:admin@127.0.0.1:5984/student_db/_design/students_by_name
+
+Query the view:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/student_db/_design/students_by_name/_view/by_name?include_docs=true
+
+6. Display first 5 students:
+
+This can be done using the limit parameter with _all_docs.
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/student_db/_all_docs?include_docs=true&limit=5
+
+7. Display students 5,6,7:
+
+This requires skipping the first 4 and then taking 3 documents.
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/student_db/_all_docs?include_docs=true&skip=4&limit=3
+
+8. List the degree of student "Rahul":
+
+Query the by_name view with a specific key.
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/student_db/_design/students_by_name/_view/by_name?key=%22Rahul%22&include_docs=true
+
+9. Display students details of 5,6,7 in descending order of percentage:
+
+This is more complex with views and involves creating a new view and then reversing the order. First, a view that emits CGPA.
+Bash
+
+curl -X PUT -H "Content-Type: application/json" -d "{\"_id\":\"_design/students_by_cgpa\",\"views\":{\"by_cgpa\":{\"map\":\"function(doc) { if (doc.CGPA) { emit(doc.CGPA, doc); } }\"}}}" http://admin:admin@127.0.0.1:5984/student_db/_design/students_by_cgpa
+
+Then query in descending order (by setting descending=true), skip 4 and limit to 3.
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/student_db/_design/students_by_cgpa/_view/by_cgpa?descending=true&skip=4&limit=3&include_docs=true
+
+10. Display all the BCA students with CGPA greater than 6, but less than 7.5:
+
+This will require using _find (Mango query) as it involves multiple conditions.
+Bash
+
+curl -X POST -H "Content-Type: application/json" -d "{\"selector\":{\"Degree\":\"BCA\",\"CGPA\":{\"$gt\":6,\"$lt\":7.5}}}" http://admin:admin@127.0.0.1:5984/student_db/_find
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CRUD operations in CouchDB Library Database
+
+1. Create a library database:
+Bash
+
+curl -X PUT http://admin:admin@127.0.0.1:5984/library_db
+
+2. Insert Documents (Example Data):
+Bash
+
+curl -X POST -H "Content-Type: application/json" -d "{\"ISBN\":\"978-0743273565\",\"Title\":\"The Great Gatsby\",\"Author\":\"F. Scott Fitzgerald\",\"Genre\":\"Fiction\",\"PublicationYear\":1925,\"CopiesAvailable\":5,\"Rating\":4.5}" http://admin:admin@127.0.0.1:5984/library_db
+curl -X POST -H "Content-Type: application/json" -d "{\"ISBN\":\"978-0451524935\",\"Title\":\"1984\",\"Author\":\"George Orwell\",\"Genre\":\"Dystopian\",\"PublicationYear\":1949,\"CopiesAvailable\":3,\"Rating\":4.7}" http://admin:admin@127.0.0.1:5984/library_db
+curl -X POST -H "Content-Type: application/json" -d "{\"ISBN\":\"978-0061120084\",\"Title\":\"To Kill a Mockingbird\",\"Author\":\"Harper Lee\",\"Genre\":\"Fiction\",\"PublicationYear\":1960,\"CopiesAvailable\":7,\"Rating\":4.8}" http://admin:admin@127.0.0.1:5984/library_db
+curl -X POST -H "Content-Type: application/json" -d "{\"ISBN\":\"978-0547928227\",\"Title\":\"The Hobbit\",\"Author\":\"J.R.R. Tolkien\",\"Genre\":\"Fantasy\",\"PublicationYear\":1937,\"CopiesAvailable\":4,\"Rating\":4.6}" http://admin:admin@127.0.0.1:5984/library_db
+curl -X POST -H "Content-Type: application/json" -d "{\"ISBN\":\"978-0140283334\",\"Title\":\"Pride and Prejudice\",\"Author\":\"Jane Austen\",\"Genre\":\"Romance\",\"PublicationYear\":1813,\"CopiesAvailable\":6,\"Rating\":4.4}" http://admin:admin@127.0.0.1:5984/library_db
+
+3. Display all the documents in the library database:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/library_db/_all_docs?include_docs=true
+
+4. Display all the books in the genre "Fiction":
+
+Create a design document with a view to query by Genre.
+Bash
+
+curl -X PUT -H "Content-Type: application/json" -d "{\"_id\":\"_design/books\",\"views\":{\"by_genre\":{\"map\":\"function(doc) { if (doc.Genre) { emit(doc.Genre, doc); } }\"}}}" http://admin:admin@127.0.0.1:5984/library_db/_design/books
+
+Then query the view:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/library_db/_design/books/_view/by_genre?key=%22Fiction%22&include_docs=true
+
+5. Display all books sorted by their Title in alphabetical order:
+
+Create a view for sorting by Title.
+Bash
+
+curl -X PUT -H "Content-Type: application/json" -d "{\"_id\":\"_design/books_by_title\",\"views\":{\"by_title\":{\"map\":\"function(doc) { if (doc.Title) { emit(doc.Title, doc); } }\"}}}" http://admin:admin@127.0.0.1:5984/library_db/_design/books_by_title
+
+Query the view:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/library_db/_design/books_by_title/_view/by_title?include_docs=true
+
+6. Display the first 3 books:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/library_db/_all_docs?include_docs=true&limit=3
+
+7. Display books 4, 5, and 6:
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/library_db/_all_docs?include_docs=true&skip=3&limit=3
+
+8. List the Author of the book titled "The Great Gatsby.":
+
+Query the by_title view with the specific key.
+Bash
+
+curl -X GET http://admin:admin@127.0.0.1:5984/library_db/_design/books_by_title/_view/by_title?key=%22The%20Great%20Gatsby%22&include_docs=true
+
