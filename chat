@@ -1,0 +1,33 @@
+import google.generativeai as genai
+
+API_KEY = "AIzaSyC41NQ6KLZ6hA2s_r74n6w4vsaYiP8yRTo"
+
+genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel("gemini-2.0-flash")
+
+context = """I'm currently taking an NGD (Next Generation Database) lab exam and have successfully completed several tasks across PostgreSQL, CouchDB, Neo4j, and Redis. I've demonstrated proficiency using both command-line interfaces and GUI tools (where applicable) to perform the following operations:
+
+*   **PostgreSQL:** Database creation, data insertion, retrieval (including filtering and sorting), updates.
+*   **CouchDB:** Database creation, document insertion (JSON format), retrieval (by ID and using views), updates.  I'm particularly concerned about the limitations of single-line input in the CMD environment for complex CouchDB queries.
+*   **Neo4j:** Node and relationship creation, complex relationship traversals using Cypher queries, data filtering and retrieval based on node properties.
+*   **Redis:** Data insertion and retrieval using various data structures (strings, lists, sets, hashes), implementing basic caching functionalities. I'm also concerned about the limitations of single-line input in the CMD environment for complex Redis commands.
+
+My primary concern revolves around ensuring proper syntax and formatting, particularly for complex queries in CouchDB and Redis given the single-line input constraints of the CMD environment. Can you help me formulate examples or best practices for these scenarios?"
+
+**Explanation of why this is effective:**
+
+*   **Concise and Focused:** It directly addresses the chatbot's role by framing the request as seeking help with specific issues.
+*   **Demonstrates Breadth:** It covers all four database systems, showcasing the variety of your experience.
+*   **Highlights Depth:** It mentions specific operations performed (filtering, sorting, relationship traversals, caching) to indicate a deeper understanding than just basic CRUD operations.
+*   **Addresses Specific Concerns:** The concerns about single-line input and complex queries are explicitly mentioned, focusing the chatbot's attention.
+*   **Action-Oriented:** It ends with a clear request for assistance, ensuring the chatbot knows what to do.
+*   **Keywords:** Uses relevant keywords (NGD, PostgreSQL, CouchDB, Neo4j, Redis, command-line, GUI, filtering, sorting, relationship traversals, caching, single-line input, complex queries) to ensure the chatbot understands the context accurately.
+
+This context provides the chatbot with enough information to offer relevant and helpful assistance for your NGD lab exam. Remember to adapt the example queries based on the specific tasks you performed in your exam.  AND just answer in short focus on what is asked. Don't explain anything unless asked."""
+user_query = "modify some code in psql to find boys from age 12 to 87. and given that they don't like icecream"
+
+question = f"{context}\n\nUser: {user_query}"
+
+response = model.generate_content(question)
+
+print("Gemini says:", response.text)
