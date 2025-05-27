@@ -1,0 +1,136 @@
+Redis Query Questions - Product Catalog Scenario
+
+For Redis, you'll use redis-cli commands directly in your CMD.
+
+1. Create a product catalog database with products having attributes: (ProductID, Name, Category, Price)
+
+Redis doesn't have a concept of "creating a database" like SQL. You simply start using keys.
+
+2. Insert products into Redis with keys like product:(ProductID) and values as JSON objects containing Name, Category, and Price.
+Bash
+
+HSET product:1 Name "Laptop" Category "Electronics" Price 1200
+HSET product:2 Name "Mouse" Category "Electronics" Price 25
+HSET product:3 Name "Keyboard" Category "Electronics" Price 75
+HSET product:4 Name "Desk Chair" Category "Furniture" Price 150
+HSET product:5 Name "Monitor" Category "Electronics" Price 300
+
+3. Retrieve details of a specific product by ProductID.
+Bash
+
+HGETALL product:1
+
+4. Fetch all products belonging to a specific category. (Electronics)
+
+This requires a more advanced Redis feature, or you can maintain a SET of product IDs for each category. For simple queries in redis-cli without complex indexing, you'd typically iterate or use SCAN. A more efficient way is to maintain sets.
+
+Let's assume you want to query all products and filter by category in your application logic, or maintain a set for each category:
+Bash
+
+SADD category:Electronics product:1 product:2 product:3 product:5
+SADD category:Furniture product:4
+
+Then to get all electronics products:
+Bash
+
+SMEMBERS category:Electronics
+
+To get the details of each of those products, you'd iterate the results from SMEMBERS and use HGETALL for each product:ID.
+
+5. List Products in a Price Range (500 - 1000):
+
+This is not a direct operation in standard redis-cli without iterating all products and checking their prices. For efficient range queries, you'd typically use a sorted set.
+
+Let's create a sorted set for prices:
+Bash
+
+ZADD prices 1200 product:1
+ZADD prices 25 product:2
+ZADD prices 75 product:3
+ZADD prices 150 product:4
+ZADD prices 300 product:5
+
+Now, query the range:
+Bash
+
+ZRANGEBYSCORE prices 500 1000 WITHSCORES
+
+To get the actual product details for these keys, you would then use HGETALL for each product ID.
+
+6. Update Product Price:
+Bash
+
+HSET product:1 Price 1250
+
+7. Delete a Product:
+Bash
+
+DEL product:1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Redis Query Questions - Employee Management System
+
+1. Consider an employee management system where each employee has attributes: (EmployeeID, Name, Department, Position, Salary).
+
+2. Insert Employee Details into Redis: Insert employee records into Redis with keys like employee:{EmployeeID} and values as JSON objects containing Name, Department, Position, and Salary.
+Bash
+
+HSET employee:e101 Name "John Doe" Department "HR" Position "Manager" Salary 60000
+HSET employee:e102 Name "Jane Smith" Department "Engineering" Position "Developer" Salary 75000
+HSET employee:e103 Name "Peter Jones" Department "HR" Position "Recruiter" Salary 45000
+HSET employee:e104 Name "Alice Brown" Department "Sales" Position "Sales Rep" Salary 55000
+
+3. Retrieve All Employees in a Specific Department (e.g., "HR"):
+
+Similar to product categories, you'd maintain a set for each department for efficient lookup.
+Bash
+
+SADD department:HR employee:e101 employee:e103
+SADD department:Engineering employee:e102
+SADD department:Sales employee:e104
+
+Then retrieve:
+Bash
+
+SMEMBERS department:HR
+
+And then iterate to get details for each employee: HGETALL employee:e101, HGETALL employee:e103.
+
+4. List Employees with a Salary Above a Certain Amount (e.g., $50,000):
+
+Use a sorted set for salaries.
+Bash
+
+ZADD salaries 60000 employee:e101
+ZADD salaries 75000 employee:e102
+ZADD salaries 45000 employee:e103
+ZADD salaries 55000 employee:e104
+
+Query for salaries greater than 50000:
+Bash
+
+ZRANGEBYSCORE salaries (50000 +inf
+
+This will return the employee IDs. You would then use HGETALL for each ID to get the full employee details.
+
+5. Update an Employee's Position: Write a Redis query to update the position of a specific employee identified by their EmployeeID.
+Bash
+
+HSET employee:e101 Position "Senior Manager"
