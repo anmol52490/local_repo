@@ -1,0 +1,36 @@
+Prom and Grafana:
+Sudo apt-get update
+Sudo docker pull prom/Prometheus
+In documents->Prometheus:
+prometheus.yml:
+Global:
+	Scrape_interval: 15s
+Scrape_configs:
+-	Job_name: ‘prometheus’
+Static configs:
+	-targets: [‘localhost:9090’]
+
+sudo docker run -d --name=prometheus \
+-p 9090:9090 \
+-v ./prometheus.yml:/etc/prometheus.yml \
+prom/prometheus
+
+sudo docker ps
+Go to localhost/9090:9090
+In search bar:
+Process_http_requests_total{handler = “/api/v1/query”}
+Rate(Process_http_requests_total{handler = “/api/v1/query”}[3m])
+Sudo docker stop Prometheus
+
+Next grafana:
+Sudo docker pull grafana/grafana
+Sudo docker run -d -p 3000:3000 –name=Grafana grafana/grafana
+Sudo docker start prometheus
+Open localhost/3000
+Admin, admin, skip
+Click on data source and select Prometheus
+Ifconfig, ip a or ip addr show to get ip
+Add this ip in connection
+Change http method to get
+Save, then make visualizations with various queries
+Sudo docker stop/start Prometheus Grafana
