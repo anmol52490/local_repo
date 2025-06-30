@@ -1,0 +1,269 @@
+## DevOps Exam Cheat Sheet: Docker and Kubernetes (Command-Line Only)
+
+This cheat sheet provides the essential command-line interface (CUI) commands for Docker and Kubernetes labs, focusing on direct execution steps without detailed explanations.
+
+-----
+
+### Docker
+
+#### 1\. Docker Installation
+
+1.  **Update Package List:**
+    ```bash
+    sudo apt update
+    ```
+      * *Troubleshooting (if error occurs):*
+        ```bash
+        sudo rm /etc/apt/sources.list.d/mongodb-org-4.4.list
+        sudo apt update
+        sudo rm /etc/apt/sources.list.d/cassandra.sources.list
+        sudo apt update
+        ```
+2.  **Download and Install Docker through Script:**
+    ```bash
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh get-docker.sh
+    ```
+3.  **Verify Docker Installation:**
+    ```bash
+    docker version
+    ```
+
+#### 2\. Docker Lab Execution
+
+##### 2.1. Docker Basics and Nginx Deployment
+
+1.  **Pull "hello-world" Image:**
+    ```bash
+    sudo docker pull hello-world
+    ```
+2.  **Run "hello-world" Image:**
+    ```bash
+    sudo docker run hello-world
+    ```
+3.  **Pull "nginx" Image:**
+    ```bash
+    sudo docker pull nginx
+    ```
+4.  **Run Nginx Image in Detached Mode and Map Port:**
+    ```bash
+    sudo docker run -p 80:80 -d nginx
+    ```
+5.  **Stop Docker (Nginx Container):**
+    ```bash
+    sudo docker stop <container_id>
+    # (Alternatively, Ctrl + C in the terminal if not run in detached mode)
+    ```
+6.  **List Docker Images:**
+    ```bash
+    sudo docker images
+    ```
+7.  **List Running Containers:**
+    ```bash
+    sudo docker ps
+    ```
+
+##### 2.2. Creating a Simple Python Server Without Docker
+
+1.  **Create Project Directory Structure:**
+    ```bash
+    mkdir ~/Documents/pythonproject
+    mkdir ~/Documents/pythonproject/templates
+    ```
+2.  **Create `app.py`:**
+    ```bash
+    nano ~/Documents/pythonproject/app.py
+    ```
+      * *Content for `app.py`:*
+        ```python
+        from flask import Flask, render_template, request
+
+        app = Flask(__name__)
+
+        @app.route("/")
+        def home_page(name=None):
+            return render_template("index.html", name=name)
+
+        if __name__ == '__main__':
+            app.run(host='0.0.0.0', port=5000)
+        ```
+3.  **Create `index.html`:**
+    ```bash
+    nano ~/Documents/pythonproject/templates/index.html
+    ```
+4.  **Install `pip` (if not installed):**
+    ```bash
+    sudo apt install python3-pip
+    ```
+5.  **Install Flask:**
+    ```bash
+    pip install flask
+    ```
+6.  **Run the Flask Server:**
+    ```bash
+    python3 ~/Documents/pythonproject/app.py
+    ```
+
+##### 2.3. Creating a Docker Image for a Flask Application
+
+1.  **Navigate to Project Directory:**
+    ```bash
+    cd Documents/pythonproject
+    ```
+2.  **Create a `Dockerfile`:**
+    ```bash
+    nano Dockerfile
+    ```
+      * *Content for `Dockerfile`:*
+        ```dockerfile
+        FROM python:3-alpine3.15
+        WORKDIR /app
+        COPY . /app
+        RUN pip install flask
+        CMD ["python3", "app.py"]
+        ```
+3.  **Build the Docker Image:**
+    ```bash
+    sudo docker build -t myimage:1 .
+    ```
+4.  **List all Docker Images:**
+    ```bash
+    sudo docker images
+    ```
+
+##### 2.4. Pushing Image to Docker Hub
+
+1.  **Rename Docker Image (Tagging):**
+    ```bash
+    sudo docker tag myimage:1 your_dockerhub_username/dockerimage
+    ```
+2.  **Login to Docker Hub:**
+    ```bash
+    sudo docker login -u your_dockerhub_username
+    ```
+3.  **Push Image to Docker Hub:**
+    ```bash
+    sudo docker push your_dockerhub_username/dockerimage
+    ```
+4.  **Logout from Docker Hub:**
+    ```bash
+    sudo docker logout
+    ```
+
+##### 2.5. Docker Networking Bridge
+
+
+### Docker Networking: Pinging Between Containers & External
+
+#### Prerequisites:
+
+  * **Install Bridge Utilities:**
+    ```bash
+    sudo apt-get install bridge-utils
+    ```
+
+#### 1\. Default Bridge (`docker0`)
+
+This shows container communication and external access on the default network.
+
+1.  **Show Linux Bridges:**
+    ```bash
+    brctl show
+    ```
+2.  **Run First Ubuntu Container (Container 1):**
+    ```bash
+    sudo docker run -dt --name ubuntu-1 ubuntu bash
+    ```
+3.  **Run Second Ubuntu Container (Container 2):**
+    ```bash
+    sudo docker run -dt --name ubuntu-2 ubuntu bash
+    ```
+4.  **List Running Containers:**
+    ```bash
+    sudo docker ps
+    ```
+5.  **Get IP Address of Container 2:**
+    ```bash
+    sudo docker inspect -f '{{.NetworkSettings.IPAddress}}' ubuntu-2
+    # Note down the IP (e.g., 172.17.0.x)
+    ```
+6.  **Access Container 1's Bash Terminal:**
+    ```bash
+    sudo docker exec -it ubuntu-1 bash
+    ```
+7.  **Inside Container 1 (install ping and test connectivity):**
+    ```bash
+    apt update -y
+    apt install -y iputils-ping
+    ping google.com           # Ping external
+    ping <IP_of_ubuntu-2>     # Ping another container by IP
+    # Example: ping 172.17.0.3
+    exit                      # Exit Container 1
+    ```
+8.  **Stop and Remove Containers:**
+    ```bash
+    sudo docker stop ubuntu-1 ubuntu-2
+    sudo docker rm ubuntu-1 ubuntu-2
+    ```
+
+#### 2\. Custom Bridge Network
+
+This shows container communication and external access on a user-defined network, including network management.
+
+1.  **Create a Custom Bridge Network:**
+    ```bash
+    sudo docker network create custom_bridge
+    ```
+2.  **List Docker Networks (verify custom\_bridge):**
+    ```bash
+    sudo docker network ls
+    ```
+3.  **Show Linux Bridges (verify custom\_bridge in `brctl` output):**
+    ```bash
+    brctl show
+    ```
+4.  **Run First Ubuntu Container (Container A) on Custom Bridge:**
+    ```bash
+    sudo docker run -dt --name ubuntu-a --network custom_bridge ubuntu bash
+    ```
+5.  **Run Second Ubuntu Container (Container B) on Custom Bridge:**
+    ```bash
+    sudo docker run -dt --name ubuntu-b --network custom_bridge ubuntu bash
+    ```
+6.  **List Running Containers:**
+    ```bash
+    sudo docker ps
+    ```
+7.  **Access Container A's Bash Terminal:**
+    ```bash
+    sudo docker exec -it ubuntu-a bash
+    ```
+8.  **Inside Container A (install ping and test connectivity):**
+    ```bash
+    apt update -y
+    apt install -y iputils-ping
+    ping google.com           # Ping external
+    ping ubuntu-b             # Ping another container by name
+    exit                      # Exit Container A
+    ```
+9.  **Inspect Custom Bridge (optional - to see connected containers and IPs):**
+    ```bash
+    sudo docker inspect custom_bridge
+    ```
+10. **Connect a Container to Another Network (Example: connect ubuntu-a to default bridge):**
+    ```bash
+    sudo docker network connect bridge ubuntu-a
+    ```
+11. **Disconnect a Container from a Network (Example: disconnect ubuntu-a from default bridge):**
+    ```bash
+    sudo docker network disconnect bridge ubuntu-a
+    ```
+12. **Stop and Remove Containers:**
+    ```bash
+    sudo docker stop ubuntu-a ubuntu-b
+    sudo docker rm ubuntu-a ubuntu-b
+    ```
+13. **Remove Custom Bridge Network:**
+    ```bash
+    sudo docker network rm my-custom-bridge
+    ```
