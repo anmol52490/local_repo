@@ -1,0 +1,112 @@
+
+-----
+
+### Kubernetes
+
+#### 1\. Minikube Installation
+
+1.  **Install `kubectl`:**
+    ```bash
+    sudo snap install kubectl --classic
+    ```
+2.  **Verify `kubectl` Installation:**
+    ```bash
+    kubectl version --client
+    ```
+3.  **Download Minikube Executable:**
+    ```bash
+    curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+    ```
+4.  **Install Minikube:**
+    ```bash
+    sudo install minikube-linux-amd64 /usr/local/bin/minikube
+    ```
+5.  **Verify Minikube Installation:**
+    ```bash
+    minikube version
+    ```
+6.  **Add User to Docker Group:**
+    ```bash
+    sudo usermod -aG docker $USER
+    ```
+7.  **Apply New Group Changes:**
+    ```bash
+    newgrp docker
+    ```
+8.  **Restart Docker Service:**
+    ```bash
+    sudo systemctl restart docker
+    ```
+9.  **Start Minikube Cluster:**
+    ```bash
+    minikube start --driver docker
+    ```
+      * *Troubleshooting (if error occurs):*
+        ```bash
+        minikube delete
+        minikube start --driver docker
+        ```
+10. **Check Minikube Status:**
+    ```bash
+    minikube status
+    ```
+
+#### 2\. Kubernetes Lab Execution
+
+##### 2.1. Kubernetes Pod and Service Management
+
+1.  **Create a Pod:**
+    ```bash
+    kubectl run my-pod --image nginx --restart Never
+    ```
+2.  **Get Pods Status:**
+    ```bash
+    kubectl get pods
+    ```
+3.  **Get Detailed Pod Information (including IP):**
+    ```bash
+    kubectl get pod my-pod -o wide
+    ```
+4.  **Expose Pod through NodePort Service:**
+    ```bash
+    kubectl expose pod my-pod --type=NodePort --port=80 --name=my-service
+    ```
+5.  **Get Services Status:**
+    ```bash
+    kubectl get services
+    ```
+6.  **Access Nginx Server via NodePort:**
+    ```bash
+    minikube service my-service
+    ```
+7.  **Delete Pod:**
+    ```bash
+    kubectl delete pod my-pod
+    ```
+8.  **Delete Service:**
+    ```bash
+    kubectl delete service my-service
+    ```
+
+##### 2.2. Kubernetes Deployment and Scaling
+
+1.  **Create a Deployment:**
+    ```bash
+    kubectl create deployment my-deployment --image=nginx
+    ```
+2.  **Scale the Deployment:**
+    ```bash
+    kubectl scale deployment my-deployment --replicas=5
+    ```
+3.  **Check Pods Status (after scaling):**
+    ```bash
+    kubectl get pods
+    ```
+4.  **Delete a Pod:**
+    ```bash
+    kubectl delete pod <name_of_one_my-deployment_pod>
+    ```
+5.  **Check Pods Status (after deleting a pod):**
+    ```bash
+    kubectl get pods
+    ```
