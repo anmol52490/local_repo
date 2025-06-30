@@ -1,0 +1,28 @@
+Sudo systemctl start/status Jenkins
+For pass if not admin: sudo more /var/lib/Jenkins/secrets/initialAdminPassword
+Job1:
+Use github to create job1 in scm
+In build triggers, Build periodically H/5 * * * *
+In build steps => execute shell: Python3 hello.py
+
+For job2:
+In build triggers, build after projects are built, projects to watch => git_job1, 
+In execute shell: 
+echo $BUILD_NUMBER
+python3 -c “import datetime; print(datetime.datetime.now())”
+
+For pipeline:
+Manage Jenkins, plugins, available plugins, tick build_pipeline and install and go back to top page
+Click on plus(next to all)
+New view:
+Pipeline_test
+Type = build  pipeline view
+Title 1 in build pipeline view title
+Git_job1 in initial job
+In configs:
+1, just the pipeline number, just the build name and number, 60, lightbox
+Visualize pipeline
+Configure git_job1, build other projects
+In post-build actions, projects to build = job2
+Click on pipeline_test
+Sudo systemctl stop jenkins
