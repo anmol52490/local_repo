@@ -110,3 +110,30 @@
     ```bash
     kubectl get pods
     ```
+
+
+OR
+
+
+Minikube start –driver=docker
+Minikube status
+Kubectl get nodes
+Kubectl get pods
+Kubectl run my-pod –image=nginx –restart=never
+Kubectl get pods
+Kubectl get pod my-pod -o wide
+Kubectl expose pod my-pod –type=NodePort –port=80 –name =my-service
+Kubectl get_services
+Minikube service my-service –url
+Go to the url
+To delete:
+Kubectl delete service my_service
+Kubectl delete pod my-pod
+Deploy with replicas:
+Kubectl create deployment my-deployment –image=nginx –replicas=2
+Kubectl get pods
+Kubectl get deployment
+Kubectl expose deployment my-deployment –type=NodePort –port=80
+Minikube service my-deployment –url
+Kubectl scale deployment my-deployment –replicas=5
+Get pods and delete pods to show working
