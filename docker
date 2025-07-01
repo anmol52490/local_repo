@@ -267,3 +267,29 @@ This shows container communication and external access on a user-defined network
     ```bash
     sudo docker network rm my-custom-bridge
     ```
+OR
+
+Sudo apt-get install bridge-utils
+Brctl show
+Sudo docker run -dt ubuntu bash
+Sudo docker network ls
+Sudo docker inspect (bridge_id)
+Then get the container id
+Sudo docker exec -it container_id bash
+Inside the bash terminal:
+Apt-get update -y
+Apt-get install -y iputils-ping
+Ping google.com
+Ping another container
+exit
+
+To create a custom bridge:
+Sudo docker network create custom_bridge
+Sudo docker network ls
+Brctl show
+Sudo docker run -dt –network custom_bridge ubuntu bash
+Run multiple times for multiple containers
+Sudo docker ps
+Inspect as exec
+Sudo docker network connect custom_bridge container_id
+For opposite use disconnect
